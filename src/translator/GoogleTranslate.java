@@ -1,7 +1,7 @@
 package translator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.tools.javac.code.Attribute;
+//import com.sun.tools.javac.code.Attribute;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -26,7 +26,7 @@ public final class GoogleTranslate { //Class marked as final since all methods a
     /**
      * URL to query for Translation
      */
-    private static final String GOOGLE_TRANSLATE_URL = "http://translate.google.com/translate_a/single";
+    private static final String GOOGLE_TRANSLATE_URL = "https://translate.google.com/translate_a/single";
 
     /**
      * Private to prevent instantiation
@@ -87,12 +87,11 @@ public final class GoogleTranslate { //Class marked as final since all methods a
     }
 
 
-
-    private static String generateURL2(String sourceLanguage , String targetLanguage , String text) throws UnsupportedEncodingException {
+    private static String generateURL2(String sourceLanguage , String targetLanguage , String text, String tk) throws UnsupportedEncodingException {
         String encoded = URLEncoder.encode(text, "UTF-8"); //Encode
         StringBuilder sb = new StringBuilder();
         sb.append(GOOGLE_TRANSLATE_URL);
-        sb.append("?client=gtx");
+        sb.append("?client=t");
         sb.append("&ie=UTF-8");
         sb.append("&oe=UTF-8");
         sb.append("&sl=");
@@ -111,6 +110,8 @@ public final class GoogleTranslate { //Class marked as final since all methods a
         sb.append("&dt=ss");
         sb.append("&dt=t");
         sb.append("&dt=at");
+        sb.append("&tk=");
+        sb.append(tk);
         return sb.toString();
     }
 
@@ -161,8 +162,8 @@ public final class GoogleTranslate { //Class marked as final since all methods a
         return translate("auto", targetLanguage, text);
     }
 
-    public static Translated translate2(String targetLanguage , String text) throws IOException {
-        return translate2("auto", targetLanguage, text);
+    public static Translated translate2(String targetLanguage , String text, String tk) throws IOException {
+        return translate2("auto", targetLanguage, text, tk);
     }
 
     /**
@@ -194,15 +195,44 @@ public final class GoogleTranslate { //Class marked as final since all methods a
         return raw[1];//Returns the translation
     }
 
-    public static Translated translate2(String sourceLanguage , String targetLanguage , String text) throws IOException {
+
+    public static String getGoogleString(String sourceLanguage , String targetLanguage , String text) throws IOException {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        String urlText = generateURL2(sourceLanguage, targetLanguage, text);
+        String urlText = generateURL2(sourceLanguage, targetLanguage, text, "");
 
 
         URL url = new URL(urlText);
         String rawData = urlToText(url);//Gets text from Google
+
+        return rawData; //Returns the translation
+    }
+
+    public static ArrayList getGoogleArray(String sourceLanguage , String targetLanguage , String text, String tk) throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        String urlText = generateURL2(sourceLanguage, targetLanguage, text, tk);
+        URL url = new URL(urlText);
+        String rawData = urlToText(url);
+
+        if (rawData == null) {
+            return null;
+        }
+
+        return mapper.readValue(rawData, ArrayList.class);
+    }
+
+    public static Translated translate2(String sourceLanguage , String targetLanguage , String text, String tk) throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        String urlText = generateURL2(sourceLanguage, targetLanguage, text, tk);
+
+
+        URL url = new URL(urlText);
+        String rawData = urlToText(url);//Gets text from Google
+        System.out.println(rawData);
         if (rawData == null) {
             return null;
         }
@@ -222,7 +252,7 @@ public final class GoogleTranslate { //Class marked as final since all methods a
                     Translation trans = new Translation();
                     trans.setType((String) ((ArrayList)translation).get(0));
 
-                    ArrayList<String> words = new ArrayList<>();
+                    ArrayList<String> words = new ArrayList<String>();
 
                     for(Object innerTranslation : (ArrayList) ((ArrayList)translation).get(2)){
                         words.add((String) ((ArrayList)innerTranslation).get(0));
@@ -248,7 +278,15 @@ public final class GoogleTranslate { //Class marked as final since all methods a
     private static String urlToText(URL url) throws IOException {
         URLConnection urlConn = url.openConnection(); //Open connection
         //Adding header for user agent is required. Otherwise, Google rejects the request
-        urlConn.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:2.0) Gecko/20100101 Firefox/4.0");
+        urlConn.addRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:61.0) Gecko/20100101 Firefox/61.0");
+        urlConn.addRequestProperty("Host", "translate.google.co.in");
+        urlConn.addRequestProperty("Accept", "*/*");
+        urlConn.addRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        urlConn.addRequestProperty("Referer" ,"https://translate.google.co.in/");
+        urlConn.addRequestProperty("Cookie","NID=135=Hf88oU7oleufaeoJShgkY-3tJFysBqeHFw8ZsALorxtDcw9-oNe_gi7kktdggs8FPVSP_l1BFRSg3DaC4_GPAuzOjv5GtySoMmByzN94ZG2YIDTO-FX_S2rDl2KUcs0L2QslhV1hMwo1ywXmKOi7kMB0hkh1M89kdwsKk6GBcdlNWEEWG2o93ES4gxcBbArApQ_5-Z0Y5rUxJLjZwyz1LZzmMMLBSB5q6tsX0hqcD-4DV7VXeKAIU7ZhzKIow4p1z31md8ai5JnUGfuu5l2ovMzB3E_W5B8-5Ny-qm6pmlUSj8gaa-TWkwOD-_LBNh01neRzBA; SID=SQaZr555-uTzYT6ri6H7pP5ehGVVD1rT2R7_2BDNbPSChSXwHW1gs9hMImlFpEgUM7VWXA.; HSID=AvF1vuUO4bD9EouIU; SSID=AjGeOd-bV50DDjViB; APISID=JWKYNn7N_vdFIGUm/AmmNu1bkNN6aOUCCq; SAPISID=AwzmyaIGavC2-da0/AWpBl3hs6LuB6eswh; 1P_JAR=2018-7-27-3; CONSENT=YES+IN.en+20160717-08-0; _ga=GA1.4.123499494.1532536462; OGPC=873035776-2:; OGP=-873035776:; _gid=GA1.4.979054543.1532661299");
+        urlConn.addRequestProperty("Connection", "keep-alive");
+        urlConn.addRequestProperty("Cache-Control", "max-age=0");
+
         Reader r = new java.io.InputStreamReader(urlConn.getInputStream(), Charset.forName("UTF-8"));//Gets Data Converts to string
         StringBuilder buf = new StringBuilder();
 
@@ -265,7 +303,7 @@ public final class GoogleTranslate { //Class marked as final since all methods a
     /**
      * Searches RAWData for Language
      *
-     * @param RAWData
+     *
      *            the raw String directly from Google you want to search through
      * @return The language parsed from the rawData or en-US (English-United States) if Google cannot determine it.
      */

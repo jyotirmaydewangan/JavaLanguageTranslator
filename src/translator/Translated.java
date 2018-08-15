@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class Translated {
     private String text;
-    private List<Translation> translations = new ArrayList<>();
+    private List<Translation> translations = new ArrayList<Translation>();
 
     public String getText() {
         return text;

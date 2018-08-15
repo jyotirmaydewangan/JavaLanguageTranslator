@@ -1,37 +1,47 @@
 package translator;
 
 
-import entity.Hindi;
-import entity.Urdu;
-import entity.Words;
+import entity.Tamil;
+import googleEntity.Words;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import utility.HibernateUtil;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class TranslatorExample {
-	
-	public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+
 
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = null;
+        Random rand = new Random();
 
-		try {
-
-			for(int i=126769; i <= 147478; i++) {
+            //147478
+			for(int i=66260; i <= 257731; i++) {
 
                 session = sessionFactory.openSession();
                 Words words = (Words)session.get(Words.class, i);
                 session.close();
 
-				Translated translated = GoogleTranslate.translate2("ur", words.getLemma());
+                if(words == null)
+                    continue;
 
+                Translated translated = null;
+                try {
+                    translated = GoogleTranslate.translate2("ne", words.getEnglishWord(), words.getToken());
+                } catch (Exception ex) {
+                    System.out.println(ex.getMessage());
+                    Thread.sleep(rand.nextInt(5000) + 1);
+                    i--;
+                    continue;
+                }
 
-                System.out.println("Meaning Word " + i + " = " + words.getLemma());
+                System.out.println("Meaning Word " + i + " = " + words.getEnglishWord());
                 System.out.println("Text = " + translated.getText());
 
-                Urdu hindi = new Urdu();
+                Tamil hindi = new Tamil();
                 hindi.setWordid(i);
                 hindi.setHword(translated.getText());
                 hindi.setType("text");
@@ -61,9 +71,6 @@ public class TranslatorExample {
 
                 System.out.println("*********************************");
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 
         HibernateUtil.shutdown();
 		

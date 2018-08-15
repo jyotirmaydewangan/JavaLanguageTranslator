@@ -3,11 +3,11 @@ package entity;
 import javax.persistence.*;
 
 /**
- * Created by jyotirmay.d on 01/11/17.
+ * Created by jyotirmay.d on 20/01/18.
  */
 @Entity
-@Table(name = "hindi")
-public class Hindi {
+@Table(name = "telugu")
+public class Telugu {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")

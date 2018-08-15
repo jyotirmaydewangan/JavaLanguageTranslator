@@ -12,11 +12,11 @@ public class Urdu {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private int id;
-    @Column(name = "wordid")
+    @Column(name = "wordId")
     private int wordid;
-    @Column(name = "hword")
+    @Column(name = "targetWord")
     private String hword;
-    @Column(name = "type")
+    @Column(name = "partOfSpeech")
     private String type;
 
     public String getType() {
@@ -50,6 +50,5 @@ public class Urdu {
     public void setHword(String hword) {
         this.hword = hword;
     }
-
 
 }

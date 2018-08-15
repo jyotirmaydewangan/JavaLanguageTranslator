@@ -6,8 +6,8 @@ import javax.persistence.*;
  * Created by jyotirmay.d on 01/11/17.
  */
 @Entity
-@Table(name = "hindi")
-public class Hindi {
+@Table(name = "bengali")
+public class Bengali {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
