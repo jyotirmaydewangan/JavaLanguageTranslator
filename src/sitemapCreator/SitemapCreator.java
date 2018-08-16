@@ -3,6 +3,7 @@ package sitemapCreator;
 
 import cz.jiripinkas.jsitemapgenerator.WebPageBuilder;
 import cz.jiripinkas.jsitemapgenerator.generator.SitemapGenerator;
+import googleEntity.Analysis;
 import googleEntity.Words;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -16,7 +17,7 @@ import java.util.Date;
 public class SitemapCreator {
     private static final String baseUrl = "http://13.127.148.25";
     private static final int begin = 1;
-    private static final int upperLimit = 257731;
+    private static final int upperLimit = 196416;
     private static int jump = 150;
     private static final double growth = 1.5; // in %
 
@@ -43,20 +44,26 @@ public class SitemapCreator {
             System.out.println("Start = " + start + ", End = " + end + ", jump = " + jump + ", " + now.toString());
             SitemapGenerator sitemapGenerator = new SitemapGenerator(baseUrl);
 
+            session = sessionFactory.openSession();
             for (int i = start; (i < end) && (end <= upperLimit); i++) {
-                session = sessionFactory.openSession();
-                Words words = (Words) session.get(Words.class, i);
-                session.close();
+
+                Analysis analysis = (Analysis) session.get(Analysis.class, i);
+                Words words = analysis.getWord();
 
                 if (words == null) {
                     end++;
                     continue;
                 }
 
+                if (analysis.getValue() == 0) {
+                    break;
+                }
+
                 url = "english-word/" + words.getEnglishWord() + "/meaning-in-hindi";
                 sitemapGenerator.addPage(new WebPageBuilder().name(url).lastMod(now).build());
                 wordCount++;
             }
+            session.close();
 
             int year = calendar.getTime().getYear() - 100;
             int date = calendar.getTime().getDate();

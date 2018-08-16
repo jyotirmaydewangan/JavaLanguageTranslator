@@ -23,6 +23,7 @@
         <mapping class="googleEntity.Definitions" />
         <mapping class="googleEntity.Synonyms" />
         <mapping class="googleEntity.SeeAlso" />
+        <mapping class="googleEntity.Analysis" />
 
     </session-factory>
 </hibernate-configuration>
